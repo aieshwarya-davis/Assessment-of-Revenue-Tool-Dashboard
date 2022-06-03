@@ -1,33 +1,67 @@
-#Title: World Revenue Dashboard
-#Author: Aieshwarya Davis
-#Date: 06/02/2022
-
-
 # Load Packages --------------------------------------------------
 
-
+# library(shiny)
+# library(tidyverse)
+# library(haven)
 pacman::p_load(shiny, tidyverse, haven, ggplot2)
 
 # Reading and Preparing Data -------------------------------------
 
 world<- read_dta("world_internal.dta")
-world1<- filter(world, year>2005)
-world1<- select(world1, cname, iso3, year, rev, tax, inc, indv, corp, pay, propr, goods, genr, vat, excises, trade, grants, soc)
-world1<- pivot_longer(world1,cols=rev:soc,names_to="indicators", values_to="values")
-
+world<- filter(world, year>2005)
+world1<- select(world, cname, iso3, year, 
+                "Total Revenue"=rev,
+                "Tax Revenue"=tax, 
+                "Income Tax Revenue"= inc, 
+                "Individual Income Tax Revenue"=indv,
+                "Corporate Income Tax Revenue"=corp,
+                "Payroll Tax Revenue"=pay, 
+                "Property Tax Revenue"=propr,
+                "Goods and Services Tax Revenue"=goods, 
+                "General Goods and Services Tax Revenue"=genr,
+                "Value Added Taxes Revenue"=vat, 
+                "Excises Revenue"=excises,
+                "Trade Tax Revenue"=trade, 
+                "Grants"= grants, 
+                "Social Contributions"= soc)
+world1<- pivot_longer(world1,cols="Total Revenue":"Social Contributions",names_to="indicators", values_to="values")
+world_data <- world1
+rm(world1)
+rm(world)
 
 # Define UI for application that draws a plot ------------------------
 
-
 ui <- fluidPage(
-  SelectInput(
+  
+  titlePanel("World Revenue Longitudinal Data Visualization App"),
+  
+  #select countty
+  selectInput(
     "select_cname",
     "Select Countries: ",
-    choices = world1$cname %>% unique()),
-
-
+    choices = unique(world_data$cname),
+    multiple = T),
   
-  uiOutput("world"),
+  #select indicators
+  selectInput(
+    "select_indicators", 
+    "Select Indicator:",
+    choices = unique(world_data$indicators),
+    multiple = F),
+  
+  #select year
+  sliderInput(
+    "select_year",
+    "Select Year: ",
+    min = min(world_data$year),
+    max = max(world_data$year),
+    value=c(2013,2016),
+    sep=""
+  ),
+  
+  
+  
+  #plot
   plotOutput("worldplot")
 )
 
@@ -37,33 +71,25 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
   
+  #filter country
   world1<-reactive({
-    foo <- subset(world1, cname == input$select_cname)
+    req(input$select_cname, input$select_indicators, input$select_year)
+    foo <- subset(world_data, cname %in% input$select_cname & indicators %in% input$select_indicators & year >= input$select_year[1] & year <= input$select_year[2])
     return(foo)
   })
   
-  output$indicators<-renderUI({
-    selectizeInput("select_indicators","Select Indicators:",
-                   choices = unique(world1()$indicators))
-  })
   
-  world2<-reactive({
-    foo<-subset(world1(),indicators == input$select_indicators)
-    return(foo)
-    
-  })
-  
+  #plot
   output$worldplot <- renderPlot({
     
-    y <- world2$values()
+    req(world1())
     
-    ggplot(world2, aes(x=years, y=world2$values))+geom_line()
+    
+    ggplot(world1(), aes(x=year, y=values,color = cname))+geom_line()
   })
   
 }
 
 # Run the application -----------------------------------------------------
 
-
 shinyApp(ui = ui, server = server)
-
