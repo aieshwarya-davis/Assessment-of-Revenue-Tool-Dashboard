@@ -1,28 +1,30 @@
-# Load Packages --------------------------------------------------
+# # Load Packages --------------------------------------------------
+# 
+# # library(shiny)
+# # library(tidyverse)
+# # library(haven)
+pacman::p_load(shiny, bslib, tidyverse, haven, lubridate, ggplot2)
 
-# library(shiny)
-# library(tidyverse)
-# library(haven)
-pacman::p_load(shiny, tidyverse, haven, ggplot2)
-
-# Reading and Preparing Data -------------------------------------
-
+# # Reading and Preparing Data -------------------------------------
+# 
 world<- read_dta("world_internal.dta")
-world<- filter(world, year>2005)
-world1<- select(world, cname, iso3, year, 
+world<- filter(world, year>2000)
+
+
+world1<- select(world, cname, iso3, year,
                 "Total Revenue"=rev,
-                "Tax Revenue"=tax, 
-                "Income Tax Revenue"= inc, 
+                "Tax Revenue"=tax,
+                "Income Tax Revenue"= inc,
                 "Individual Income Tax Revenue"=indv,
                 "Corporate Income Tax Revenue"=corp,
-                "Payroll Tax Revenue"=pay, 
+                "Payroll Tax Revenue"=pay,
                 "Property Tax Revenue"=propr,
-                "Goods and Services Tax Revenue"=goods, 
+                "Goods and Services Tax Revenue"=goods,
                 "General Goods and Services Tax Revenue"=genr,
-                "Value Added Taxes Revenue"=vat, 
+                "Value Added Taxes Revenue"=vat,
                 "Excises Revenue"=excises,
-                "Trade Tax Revenue"=trade, 
-                "Grants"= grants, 
+                "Trade Tax Revenue"=trade,
+                "Grants"= grants,
                 "Social Contributions"= soc)
 world1<- pivot_longer(world1,cols="Total Revenue":"Social Contributions",names_to="indicators", values_to="values")
 world_data <- world1
@@ -31,24 +33,38 @@ rm(world)
 
 # Define UI for application that draws a plot ------------------------
 
+my_theme <- bs_theme(version=4, bootswatch = "cerulean", base_font = font_google("Work Sans"))
+
+
 ui <- fluidPage(
   
-  titlePanel("World Revenue Longitudinal Data Visualization App"),
+  theme= my_theme,
   
+  titlePanel(HTML("<h1><center><font size=6> World Revenue Longitudinal Data Visualization App </font></center></h1>") ),
+  
+ 
+  fluidRow( 
+   
+     column(3,
+          
   #select countty
   selectInput(
     "select_cname",
     "Select Countries: ",
     choices = unique(world_data$cname),
-    multiple = T),
+    multiple = T)),
+      
   
+  column(4, 
   #select indicators
   selectInput(
     "select_indicators", 
     "Select Indicator:",
     choices = unique(world_data$indicators),
-    multiple = F),
+    multiple = F)),
   
+  
+  column(5,
   #select year
   sliderInput(
     "select_year",
@@ -56,15 +72,16 @@ ui <- fluidPage(
     min = min(world_data$year),
     max = max(world_data$year),
     value=c(2013,2016),
-    sep=""
+    sep="" ) 
+  ) 
   ),
   
   
   
   #plot
   plotOutput("worldplot")
-)
 
+)
 
 # Define server logic required to draw a plot -----------------------------
 
@@ -85,7 +102,22 @@ server <- function(input, output, session) {
     req(world1())
     
     
-    ggplot(world1(), aes(x=year, y=values,color = cname))+geom_line()
+    ggplot(world1(), aes(x=year, y=values,color = cname)) +
+      geom_line(linetype="solid", size=1) + 
+      geom_point(size=2)+ 
+      theme_bw() + 
+      scale_x_continuous(name= "Years", breaks = world_data$year) + 
+      scale_y_continuous(name= "% of GDP", labels = percent_format(scale=1, accuracy=1)) + 
+      labs(color = "Countries") +   
+      theme( panel.border = element_rect(colour = "black", fill=NA),
+               legend.background = element_blank(),
+               legend.box.background = element_rect(colour = "black"),
+               legend.title.align=0.5,
+               legend.title = element_text(face = "bold"),
+               axis.text.x = element_text(size=10),
+               axis.text.y = element_text(size=10),
+               axis.line = element_line(colour = 'black', size = 1.5))
+     
   })
   
 }
