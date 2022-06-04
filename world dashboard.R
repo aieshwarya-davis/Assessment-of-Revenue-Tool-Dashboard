@@ -1,9 +1,8 @@
 # # Load Packages --------------------------------------------------
 # 
-# # library(shiny)
-# # library(tidyverse)
-# # library(haven)
-pacman::p_load(shiny, bslib, tidyverse, haven, lubridate, ggplot2)
+
+pacman::p_load(shiny, thematic, scales, bslib, tidyverse, haven, lubridate, ggplot2)
+
 
 # # Reading and Preparing Data -------------------------------------
 # 
@@ -39,6 +38,7 @@ my_theme <- bs_theme(version=4, bootswatch = "cerulean", base_font = font_google
 ui <- fluidPage(
   
   theme= my_theme,
+  thematic_shiny()
   
   titlePanel(HTML("<h1><center><font size=6> World Revenue Longitudinal Data Visualization App </font></center></h1>") ),
  p("This app is designed to provide a cross-country comparison snapshot of 13 revenue indicators across 20 years for over 120 countries. These indicators are from four sources: the IMF’s Government Finance Statistics (GFS) and World Economic Outlook (WEO) and the OECD’s Revenue Statistics and Revenue Statistics."), 
