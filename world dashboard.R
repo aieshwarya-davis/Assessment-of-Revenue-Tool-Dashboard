@@ -41,7 +41,7 @@ ui <- fluidPage(
   theme= my_theme,
   
   titlePanel(HTML("<h1><center><font size=6> World Revenue Longitudinal Data Visualization App </font></center></h1>") ),
-  
+ p("This app is designed to provide a cross-country comparison snapshot of 13 revenue indicators across 20 years for over 120 countries. These indicators are from four sources: the IMF’s Government Finance Statistics (GFS) and World Economic Outlook (WEO) and the OECD’s Revenue Statistics and Revenue Statistics."), 
  
   fluidRow( 
    
