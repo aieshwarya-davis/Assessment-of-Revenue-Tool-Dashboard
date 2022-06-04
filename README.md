@@ -1,16 +1,11 @@
-# World-Database-Dashboard
+## World-Database-App
 
 This repository is dedicated to design an R Shiny App for the World Revenue Longitudinal Database dashboard.
 
-The r code contains the ui and server code to construct the app and the respository also contains the WoRLD database that is externally available through IMF data. 
-
-The goal is for the dashboard to show country specific trends of each revenue indicator and for it to also have cross country comparison (if possible)
+The r code contains the ui and server code to construct the app and the respository also contains the WoRLD database produced by the IMF.  
 
 
+This app shows a snapshot of a country's 13 revenue indicators across 20 years and in comparison to over 200 countries. These indicators are from four sources: the IMF’s Government Finance Statistics (GFS) and World Economic Outlook (WEO) and the OECD’s Revenue Statistics and Revenue Statistics. 
 
 
-#Bottlenecks
-
-Unable to get the server to interact and produce the plot. 
-Would like multi country select trends in the plot but with a cap of only 5 countries at a time. 
-Would also like a year range selector
+<the app is yet to be deployed>
