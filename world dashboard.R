@@ -1,11 +1,12 @@
 # # Load Packages --------------------------------------------------
 # 
-
-pacman::p_load(shiny, thematic, scales, bslib, tidyverse, haven, lubridate, ggplot2)
-
+# # library(shiny)
+# # library(tidyverse)
+# # library(haven)
+pacman::p_load(shiny, thematic, scales, bslib, tidyverse, haven, lubridate, ggplot2, plotly)
 
 # # Reading and Preparing Data -------------------------------------
-# 
+# # 
 world<- read_dta("world_internal.dta")
 world<- filter(world, year>2000)
 
@@ -27,18 +28,19 @@ world1<- select(world, cname, iso3, year,
                 "Social Contributions"= soc)
 world1<- pivot_longer(world1,cols="Total Revenue":"Social Contributions",names_to="indicators", values_to="values")
 world_data <- world1
+
+cname <- select(world_data, cname)
 rm(world1)
 rm(world)
 
 # Define UI for application that draws a plot ------------------------
 
 my_theme <- bs_theme(version=4, bootswatch = "cerulean", base_font = font_google("Work Sans"))
-
+thematic_shiny()
 
 ui <- fluidPage(
   
   theme= my_theme,
-  thematic_shiny()
   
   titlePanel(HTML("<h1><center><font size=6> World Revenue Longitudinal Data Visualization App </font></center></h1>") ),
  p("This app is designed to provide a cross-country comparison snapshot of 13 revenue indicators across 20 years for over 120 countries. These indicators are from four sources: the IMF’s Government Finance Statistics (GFS) and World Economic Outlook (WEO) and the OECD’s Revenue Statistics and Revenue Statistics."), 
@@ -52,6 +54,7 @@ ui <- fluidPage(
     "select_cname",
     "Select Countries: ",
     choices = unique(world_data$cname),
+    selected = sort(world_data$cname)[1],
     multiple = T)),
       
   
@@ -79,7 +82,7 @@ ui <- fluidPage(
   
   
   #plot
-  plotOutput("worldplot")
+  plotlyOutput("worldplot")
 
 )
 
@@ -97,27 +100,44 @@ server <- function(input, output, session) {
   
   
   #plot
-  output$worldplot <- renderPlot({
+  
+   output$worldplot <- renderPlotly({
     
     req(world1())
+    plot_ly(world1(), x= world1()$year, y= world1()$values, color= world1()$cname, 
+            type= 'scatter', mode= 'lines+markers')%>%
+            layout(xaxis = list(
+              dtick = 1, 
+              tick0 = 2000, 
+              tickmode = "linear",
+              title = "Years"
+              ),
+              yaxis = list(
+                title= "% of GDP", 
+                ticksuffix = "%"
+              ),
+              legend = list(title=list(text='Countries')
+              )
+            
+            )
     
-    
-    ggplot(world1(), aes(x=year, y=values,color = cname)) +
-      geom_line(linetype="solid", size=1) + 
-      geom_point(size=2)+ 
-      theme_bw() + 
-      scale_x_continuous(name= "Years", breaks = world_data$year) + 
-      scale_y_continuous(name= "% of GDP", labels = percent_format(scale=1, accuracy=1)) + 
-      labs(color = "Countries") +   
-      theme( panel.border = element_rect(colour = "black", fill=NA),
-               legend.background = element_blank(),
-               legend.box.background = element_rect(colour = "black"),
-               legend.title.align=0.5,
-               legend.title = element_text(face = "bold"),
-               axis.text.x = element_text(size=10),
-               axis.text.y = element_text(size=10),
-               axis.line = element_line(colour = 'black', size = 1.5))
-     
+    # 
+    # ggplot(world1(), aes(x=year, y=values,color = cname)) +
+    #   geom_line(linetype="solid", size=1) + 
+    #   geom_point(size=2)+ 
+    #   theme_minimal() + 
+    #   scale_x_continuous(name= "Years", breaks = world_data$year) + 
+    #   scale_y_continuous(name= "% of GDP", labels = percent_format(scale=1, accuracy=1)) + 
+    #   labs(color = "Countries") +   
+    #   theme( panel.border = element_rect(colour = "black", fill=NA),
+    #            legend.background = element_blank(),
+    #            legend.box.background = element_rect(colour = "black"),
+    #            legend.title.align=0.5,
+    #            legend.title = element_text(face = "bold"),
+    #            axis.text.x = element_text(size=10),
+    #            axis.text.y = element_text(size=10),
+    #            axis.line = element_line(colour = 'black', size = 1.5))
+    #  
   })
   
 }
