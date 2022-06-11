@@ -1,12 +1,19 @@
 # # Load Packages --------------------------------------------------
 # 
-# # library(shiny)
-# # library(tidyverse)
-# # library(haven)
-pacman::p_load(shiny, thematic, scales, bslib, tidyverse, haven, lubridate, ggplot2, plotly)
+# library(shiny)
+# library(tidyverse)
+# library(haven)
+# library(thematic)
+# library (scales)
+# library(bslib)
+# library(lubridate)
+# library(plotly)
+# library(shinythemes)
+pacman::p_load(shiny, shinythemes, thematic, scales, bslib, tidyverse, haven, lubridate, ggplot2, plotly)
 
 # # Reading and Preparing Data -------------------------------------
-# # 
+#
+library(haven)
 world<- read_dta("world_internal.dta")
 world<- filter(world, year>2000)
 
@@ -30,94 +37,101 @@ world1<- pivot_longer(world1,cols="Total Revenue":"Social Contributions",names_t
 world_data <- world1
 
 world_data2 <- subset(world_data, indicators!="Total Revenue" & indicators!="Tax Revenue" & indicators!="Payroll Tax Revenue" &
-              indicators!="Individual Income Tax Revenue" & indicators!="Goods and Services Tax Revenue" 
-              & indicators!= "Value Added Taxes Revenue" & indicators!="Grants")
+                        indicators!="Individual Income Tax Revenue" & indicators!="Goods and Services Tax Revenue"
+                      & indicators!= "Value Added Taxes Revenue" & indicators!="Grants")
 rm(world1)
 rm(world)
 
+
+# load("App Directory.RData")
+
 # Define UI for application that draws a plot ------------------------
 
-my_theme <- bs_theme(version=4, bootswatch = "cerulean", base_font = font_google("Work Sans"))
-thematic_shiny()
+# # library(thematic)
+# # library(bootstrap)
+# library(bslib)
+# library(plotly)
+# library(shinythemes)
+# # thematic_shiny()
 
 ui <- fluidPage(
   
-  theme= my_theme,
+  theme= bs_theme(version=4, bootswatch = "cerulean", base_font = font_google("Work Sans")),
   
-  titlePanel(HTML("<h1><center><font size=6><strong> World Revenue Longitudinal Data Visualization App </font></center></h1></strong>") ),
- HTML("<p><font size=2>This app is designed to provide a cross-country and compositional comparison snapshot of 13 revenue indicators across 20 years for over 120 countries. These indicators are from four sources: the IMF’s Government Finance Statistics (GFS) and World Economic Outlook (WEO) and the OECD’s Revenue Statistics and Revenue Statistics.</font></p>"), 
- 
-##Revenue Trends Tab UI
-    tabsetPanel(type="tabs", tabPanel("Revenue Trends",
-  fluidRow( 
-   
-     column(3,
-          
-  #select countty
-  selectInput(
-    "select_cname",
-    "Select Countries: ",
-    choices = unique(world_data$cname),
-    selected = sort(world_data$cname)[1],
-    multiple = T)),
-      
+  titlePanel(HTML("<h1><center><font size=6><font color=#3F97D4><strong> World Revenue Longitudinal Data Visualization App </font></font></center></h1></strong>") ),
+  HTML("<p><font size=2>This app is designed to provide a cross-country and compositional comparison snapshot of 13 revenue indicators across 20 years for over 120 countries. These indicators are from four sources: the IMF’s Government Finance Statistics (GFS) and World Economic Outlook (WEO) and the OECD’s Revenue Statistics and Revenue Statistics.</font></p>"), 
   
-  column(4, 
-  #select indicators
-  selectInput(
-    "select_indicators", 
-    "Select Indicator:",
-    choices = unique(world_data$indicators),
-    multiple = F)),
-  
-  
-  column(5,
-  #select year
-  sliderInput(
-    "select_year",
-    "Select Year: ",
-    min = min(world_data$year),
-    max = max(world_data$year),
-    value=c(2013,2016),
-    sep="" ) 
-  ) 
+  ##Revenue Trends Tab UI
+  tabsetPanel(type="tabs", tabPanel("Revenue Trends",
+                                    fluidRow( 
+                                      
+                                      column(3,
+                                             
+                                             #select countty
+                                             selectInput(
+                                               "select_cname",
+                                               "Select Countries: ",
+                                               choices = unique(world_data$cname),
+                                               selected = sort(world_data$cname)[1],
+                                               multiple = T)),
+                                      
+                                      
+                                      column(4, 
+                                             #select indicators
+                                             selectInput(
+                                               "select_indicators", 
+                                               "Select Indicator:",
+                                               choices = unique(world_data$indicators),
+                                               multiple = F)),
+                                      
+                                      
+                                      column(5,
+                                             #select year
+                                             sliderInput(
+                                               "select_year",
+                                               "Select Year: ",
+                                               min = min(world_data$year),
+                                               max = max(world_data$year),
+                                               value=c(2013,2016),
+                                               sep="" ) 
+                                      ) 
+                                    ),
+                                    
+                                    #plot
+                                    plotlyOutput("worldplot")
   ),
   
-  #plot
-  plotlyOutput("worldplot")
-),
-
-##Composition of Revenue tab UI
+  ##Composition of Revenue tab UI
   tabPanel("Composition of Revenue",
-       fluidRow( 
-                                    
-          column(3,
-               #select countty
-               selectInput(
-                 "select_countries",
-                 "Select Countries: ",
-                 choices = unique(world_data2$cname),
-                 selected = sort(world_data2$cname)[1],
-                 multiple = F)),
-        
-        
-        
-        column(5,
-               #select year
-               sliderInput(
-                 "select_yr",
-                 "Select Year: ",
-                 min = min(world_data2$year),
-                 max = max(world_data2$year),
-                 value=c(2013,2016),
-                 sep="" ) 
-        ) 
-      ),
-      
-      #plot
-      plotlyOutput("compositionplot")
-)
-)
+           fluidRow( 
+             
+             column(3,
+                    #select countty
+                    selectInput(
+                      "select_countries",
+                      "Select Countries: ",
+                      choices = unique(world_data2$cname),
+                      selected = sort(world_data2$cname)[1],
+                      multiple = F)),
+             
+             
+             
+             column(5,
+                    #select year
+                    sliderInput(
+                      "select_yr",
+                      "Select Year: ",
+                      min = min(world_data2$year),
+                      max = max(world_data2$year),
+                      value=c(2013,2016),
+                      sep="" ) 
+             ) 
+           ),
+           
+           #plot
+           plotlyOutput("compositionplot")
+  )
+  )
 )
 
 
@@ -136,31 +150,31 @@ server <- function(input, output, session) {
   
   #plot
   
-   output$worldplot <- renderPlotly({
+  output$worldplot <- renderPlotly({
     
     req(world1())
- 
-      plot_ly(world1(), x= world1()$year, y= world1()$values, color= world1()$cname, 
-           type= 'scatter', mode= 'lines+markers')%>%
-            layout(xaxis = list(
-              dtick = 1, 
-              tick0 = 2000, 
-              tickmode = "linear",
-              title = "Years",
-              showline= T, linewidth=2, linecolor='black'
-              ),
-              yaxis = list(
-                title= "% of GDP", 
-                ticksuffix = "%",
-                zerolinecolor = 'black',
-                showline= T, linewidth=2, linecolor='black'
-              ),
-              legend = list(title=list(text='Countries')
-              )
-              )
     
-      
-      
+    plot_ly(world1(), x= world1()$year, y= world1()$values, color= world1()$cname, 
+            type= 'scatter', mode= 'lines+markers')%>%
+      layout(xaxis = list(
+        dtick = 1, 
+        tick0 = 2000, 
+        tickmode = "linear",
+        title = "Years",
+        showline= T, linewidth=2, linecolor='black'
+      ),
+      yaxis = list(
+        title= "% of GDP", 
+        ticksuffix = "%",
+        zerolinecolor = 'black',
+        showline= T, linewidth=2, linecolor='black'
+      ),
+      legend = list(title=list(text='Countries')
+      )
+      )
+    
+    
+    
     # 
     # ggplot(world1(), aes(x=year, y=values,color = cname)) +
     #   geom_line(linetype="solid", size=1) + 
@@ -179,45 +193,45 @@ server <- function(input, output, session) {
     #            axis.line = element_line(colour = 'black', size = 1.5))
     #  
   })
-   
-   ##filter for composition of revenue tab
-   world2<-reactive({
-     req(input$select_countries, input$select_yr)
-     foo <- subset(world_data2, cname %in% input$select_countries & year >= input$select_yr[1] & year <= input$select_yr[2])
-     return(foo)
-   })
-   
-   
-   #plot
-   
-   output$compositionplot <- renderPlotly({
-     
-     req(world2())
-     
-     plot_ly(world2(), x= world2()$year, y= world2()$values, color= world2()$indicators, 
-             type= 'bar')%>%
-       layout(xaxis = list(
-         dtick = 1, 
-         tick0 = 2000, 
-         tickmode = "linear",
-         title = "Years",
-         showline= T, linewidth=2, linecolor='black'
-       ),
-       yaxis = list(
-         title= "% of GDP", 
-         ticksuffix = "%",
-         zerolinecolor = 'black',
-         showline= T, linewidth=2, linecolor='black'
-       ),
-       legend = list(title=list(text='Indicators')
-       ), 
-       barmode = 'stack'
-       
-       )   
-   
-   })
   
-    }
+  ##filter for composition of revenue tab
+  world2<-reactive({
+    req(input$select_countries, input$select_yr)
+    foo <- subset(world_data2, cname %in% input$select_countries & year >= input$select_yr[1] & year <= input$select_yr[2])
+    return(foo)
+  })
+  
+  
+  #plot
+  
+  output$compositionplot <- renderPlotly({
+    
+    req(world2())
+    
+    plot_ly(world2(), x= world2()$year, y= world2()$values, color= world2()$indicators, 
+            type= 'bar')%>%
+      layout(xaxis = list(
+        dtick = 1, 
+        tick0 = 2000, 
+        tickmode = "linear",
+        title = "Years",
+        showline= T, linewidth=2, linecolor='black'
+      ),
+      yaxis = list(
+        title= "% of GDP", 
+        ticksuffix = "%",
+        zerolinecolor = 'black',
+        showline= T, linewidth=2, linecolor='black'
+      ),
+      legend = list(title=list(text='Indicators')
+      ), 
+      barmode = 'stack'
+      
+      )   
+    
+  })
+  
+}
 
 # Run the application -----------------------------------------------------
 
