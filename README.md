@@ -1,6 +1,6 @@
 ## World-Database-App
 
-This repository is dedicated to design an R Shiny App for the World Revenue Longitudinal Database dashboard.
+This repository is dedicated to design an R Shiny App for the World Revenue Longitudinal Database.
 
 The r code contains the ui and server code to construct the app and the respository also contains the WoRLD database produced by the IMF.  
 
