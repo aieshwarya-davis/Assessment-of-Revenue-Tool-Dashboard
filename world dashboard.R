@@ -236,3 +236,15 @@ server <- function(input, output, session) {
 # Run the application -----------------------------------------------------
 
 shinyApp(ui = ui, server = server)
+
+
+
+
+############################
+tax_percapita<- merge(world, weo, by=c("cname","year"))
+tax_percapita <- tax_percapita %>% 
+  select(cname, year, rev, tax, inc, indv, corp, pay, propr, goods, genr, 
+                        vat, excises, trade, soc, grants, ngdpdpc)
+tax_percapita <- pivot_longer(tax_percapita, cols="rev":"grants",names_to="indicators", values_to="values")
+
+
