@@ -78,7 +78,6 @@ rates<- select(rates, cname, iso3, year,
                "Value Added Taxes Rate"=vat_comb,
                "Indirect Taxes Rate"=indirect_tax_comb)
 rates_data<- pivot_longer(rates,cols="Personal Income Tax Rate":"Indirect Taxes Rate",names_to="indicators", values_to="values")
-vatprod <- filter(vatprod, year>2000)
 
 #Data cleaning for CIT Productivity
 
